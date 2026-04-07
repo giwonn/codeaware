@@ -2,31 +2,9 @@
 
 ## 왜 이 프로젝트를 만들게 됐는가
 
-### 시작: 부하테스트 MCP 플러그인 아이디어
+### 시장 공백 발견
 
-처음에는 "자연어로 부하테스트를 할 수 있는 Claude 플러그인"을 만들려고 했다. k6 스크립트를 생성해주는 수준을 넘어서, MCP를 통해 자연어 한 마디로 부하테스트를 직접 실행하는 도구.
-
-시장조사를 한 결과:
-- **grafana/mcp-k6** (31 stars)가 이미 스크립트 생성 → 검증 → 실행 → 문서 참조를 모두 지원
-- QAInsights/k6-mcp-server, locust-mcp-server 등 커뮤니티 프로젝트도 존재
-- NeoLoad, AWS DLT, Azure Load Testing 등 상용/클라우드 MCP도 있음
-
-### E2E 부하테스트 + 서버 인프라 진단 논의
-
-단일 API가 아닌 여러 API 동시 호출 시나리오(DB 락 경합, 커넥션 풀 고갈 등)와 서버 코드 분석을 결합하는 방향을 논의했으나:
-- 정밀한 타이밍 제어는 k6 네이티브 scenarios가 더 정확
-- 풀 APM을 재발명하면 범위가 폭발
-- grafana/mcp-k6 대비 **압도적 차별점이 부족**하다는 결론
-
-### 슬로우쿼리 분석 MCP도 검토
-
-- crystaldba/postgres-mcp (2,500 stars)가 EXPLAIN + hypopg 가상 인덱스 시뮬레이션까지 이미 잘 하고 있음
-- MySQL 쪽은 빈 자리가 있지만 임팩트가 불확실
-- 슬로우쿼리(EXPLAIN 기반)와 부하테스트(동시성 기반)는 해결 도구와 접근법이 다름
-
-### 방향 전환: 레거시 코드 개선 플러그인
-
-시장조사 결과 핵심 공백 발견:
+코드 품질/레거시 코드 관련 MCP 생태계를 조사한 결과 핵심 공백 발견:
 - **코드 품질 분석 도구는 많지만 전부 파편화** (SonarQube, CodeScene, Omen 등)
 - **리팩토링 실행 도구는 언어별로 분리** (Python만, Java만, TS만)
 - **MSA 분해는 MCP 생태계에 전무** (상용 도구만 존재: vFunction, IBM Mono2Micro)
@@ -55,7 +33,11 @@
 ## 기술 스택 결정 이유
 
 - **TypeScript**: MCP 생태계 표준, 공식 SDK 지원, npx로 설치 없이 실행
-- **Bun**: Node.js의 libuv 스레드 풀 병목 대신 io_uring 커널 레벨 비동기 I/O 사용. 파일 수백 개 읽는 분석 도구에 적합
+- **Bun (Node.js 대신 선택한 이유)**:
+  - Node.js는 파일 I/O를 libuv 스레드 풀에 위임 (기본 4개). 동시에 파일 100개 읽으면 4개씩 순차 처리 → 병목 발생
+  - Bun은 libuv를 쓰지 않고 Linux의 io_uring을 사용하여 커널 레벨에서 비동기 I/O 처리. 스레드 풀 병목 없음
+  - 프로젝트 파일 수백~수천 개를 스캔하는 이 도구의 특성상 파일 I/O 성능이 중요
+  - 추가 장점: TypeScript를 빌드 없이 바로 실행 가능, 내장 테스트 러너 (`bun test`)
 - **MCP SDK v1.x**: 안정 버전, stdio transport로 Claude Desktop/IDE 연동
 - **Regex 기반 분석 (AST 아님)**: 외부 의존성 없이 모든 언어 지원. 진단 도구이므로 정밀도보다 범용성이 중요
 
