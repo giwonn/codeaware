@@ -15,16 +15,19 @@ jobs:
         include:
           - os: macos-latest
             target: darwin-arm64
-            bun_target: bun-darwin-arm64
-          - os: macos-13
+            bun_compile_target: bun-darwin-arm64
+          - os: macos-latest
             target: darwin-x64
-            bun_target: bun-darwin-x64
+            bun_compile_target: bun-darwin-x64
           - os: ubuntu-latest
             target: linux-x64
-            bun_target: bun-linux-x64
+            bun_compile_target: bun-linux-x64
+          - os: ubuntu-latest
+            target: linux-arm64
+            bun_compile_target: bun-linux-aarch64
           - os: windows-latest
             target: windows-x64
-            bun_target: bun-windows-x64
+            bun_compile_target: bun-windows-x64
 
     runs-on: ${{ matrix.os }}
 
@@ -38,7 +41,7 @@ jobs:
       - run: bun install
 
       - name: Build binary
-        run: bun build src/index.ts --compile --outfile codeaware-${{ matrix.target }}
+        run: bun build src/index.ts --compile --target=${{ matrix.bun_compile_target }} --outfile codeaware-${{ matrix.target }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
