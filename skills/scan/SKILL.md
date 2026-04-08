@@ -41,3 +41,23 @@ description: "코드의 AI 이해도를 6단계 척도로 진단합니다. '/cod
 |------|-------|-------|
 | ... | ... | ... |
 ```
+
+### 구조적 신호가 있는 경우 추가 출력
+
+`structuralSignals` 배열이 비어있지 않으면 아래 섹션을 추가로 출력하세요:
+
+```
+## 구조적 신호 & 리팩토링 방향
+
+| # | 유형 | 심각도 | 설명 | 리팩토링 방향 |
+|---|------|--------|------|--------------|
+| 1 | ... | ... | ... | ... |
+```
+
+유형 매핑:
+- `excessive_responsibility` → 과다 책임
+- `domain_duplication` → 도메인 중복
+- `layer_inconsistency` → 계층 불일치
+- `dependency_violation` → 의존성 위반
+- `circular_dependency` → 순환 참조
+- `god_class` → God Class
