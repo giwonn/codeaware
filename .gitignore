@@ -3,3 +3,7 @@ dist/
 *.log
 .codeaware/
 bin/codeaware
+# Gradle artifacts (from test fixtures)
+.gradle/
+.project
+.settings/
