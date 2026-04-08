@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.0] - 2026-04-08
+
+### Added
+- Slash command skills: `/codeaware:scan`, `/codeaware:roadmap`, `/codeaware:discover`
+
 ## [0.1.0] - 2026-04-08
 
 ### Added

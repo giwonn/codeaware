@@ -98,6 +98,17 @@
 
 * * *
 
+## Slash Commands
+
+| Command | Description |
+|---------|-------------|
+| `/codeaware:scan` | 현재 프로젝트 전체 AI 이해도 진단 |
+| `/codeaware:scan path/to/file` | 특정 파일 진단 |
+| `/codeaware:roadmap` | 우선순위별 개선 로드맵 생성 |
+| `/codeaware:discover path/to/file` | 리팩토링 전 숨은 맥락 질문 워크플로우 |
+
+* * *
+
 ## Quick Start
 
 <details>
