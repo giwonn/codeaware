@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { scanFile } from "./tools/scan-file";
+import { scanProjectTool } from "./tools/scan-project";
 
 const server = new McpServer({
   name: "codeaware",
@@ -17,6 +18,17 @@ server.registerTool("scan_file", {
   },
 }, async ({ file_path }) => {
   const result = await scanFile(file_path);
+  return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+});
+
+server.registerTool("scan_project", {
+  title: "Scan Project",
+  description: "Analyze an entire project for AI comprehensibility. Returns overall level (1-6), level distribution, and worst files.",
+  inputSchema: {
+    root_dir: z.string().describe("Root directory of the project to scan"),
+  },
+}, async ({ root_dir }) => {
+  const result = await scanProjectTool(root_dir);
   return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
 });
 
