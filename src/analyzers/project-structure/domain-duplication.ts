@@ -22,6 +22,10 @@ const LAYER_MARKERS = new Set([
   "port", "ports", "adapter", "adapters",
   "interfaces", "facade", "facades",
   "in", "out", "input", "output",
+  // Cross-cutting infrastructure (not business domains)
+  "config", "configuration", "auth", "security",
+  "common", "shared", "core", "utils", "util",
+  "file", "event", "exception", "error",
 ]);
 
 // Known Java package prefixes (not domains)
