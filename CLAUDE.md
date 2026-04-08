@@ -25,7 +25,13 @@ gh auth switch --user <원래계정>
 
 새 버전 릴리즈 시 **모든 단계**를 순서대로 수행:
 
-1. 코드 변경 커밋 + `git push origin main`
+### 릴리즈 전 업데이트할 파일들
+- `.claude-plugin/plugin.json` — `version` 필드를 새 버전으로 변경
+- `CHANGELOG.md` — 새 버전 항목 추가
+- `README.md` — 변경사항이 있으면 반영
+
+### 릴리즈 절차
+1. 위 파일들 수정 + 커밋 + `git push origin main`
 2. 태그 생성 + push: `git tag vX.Y.Z && git push origin vX.Y.Z`
    - 태그 push → GitHub Actions가 5개 플랫폼 바이너리 빌드 + Release 생성
 3. CI 완료 확인: `gh run list --repo giwonn/codeaware --limit 1` → `gh run watch <id>`
@@ -33,9 +39,9 @@ gh auth switch --user <원래계정>
    ```bash
    # giwonn-plugins repo 클론 (없으면)
    git clone https://github.com/giwonn/giwonn-plugins /tmp/giwonn-plugins
-   # marketplace.json의 codeaware ref를 새 태그로 변경 후 push
+   # marketplace.json의 codeaware ref를 새 태그로 변경 후 커밋 + push
    ```
-5. CHANGELOG.md 업데이트
+5. GitHub 계정 원복 (`gh auth switch --user <원래계정>`)
 
 ## 마켓플레이스 구조
 
