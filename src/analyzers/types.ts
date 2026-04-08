@@ -28,6 +28,22 @@ export interface FileAnalysis {
   dimensions: Record<string, { score: number; evidence: Evidence[] }>;
 }
 
+export type StructuralSignalType =
+  | "excessive_responsibility"
+  | "domain_duplication"
+  | "layer_inconsistency"
+  | "dependency_violation"
+  | "circular_dependency"
+  | "god_class";
+
+export interface StructuralSignal {
+  type: StructuralSignalType;
+  severity: Severity;
+  description: string;
+  suggestion: string;
+  modules: string[];
+}
+
 export const LEVEL_LABELS: Record<Level, string> = {
   1: "Well-organized",
   2: "Mostly good",
