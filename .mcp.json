@@ -3,7 +3,8 @@
     "codeaware": {
       "type": "stdio",
       "command": "bash",
-      "args": ["bin/run.sh"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bin/run.sh"],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}"
     }
   }
 }
