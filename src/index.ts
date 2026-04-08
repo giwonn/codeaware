@@ -5,6 +5,7 @@ import { z } from "zod";
 import { scanFile } from "./tools/scan-file";
 import { scanProjectTool } from "./tools/scan-project";
 import { getImprovementRoadmap } from "./tools/get-improvement-roadmap";
+import { registerPrompts } from "./prompts/architecture-migration";
 
 const server = new McpServer({
   name: "codeaware",
@@ -43,6 +44,8 @@ server.registerTool("get_improvement_roadmap", {
   const roadmap = await getImprovementRoadmap(root_dir);
   return { content: [{ type: "text" as const, text: JSON.stringify(roadmap, null, 2) }] };
 });
+
+registerPrompts(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
