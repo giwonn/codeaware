@@ -8,7 +8,11 @@ export interface FileInfo {
 }
 
 export async function readFileInfo(filePath: string): Promise<FileInfo> {
-  const content = await Bun.file(filePath).text();
+  const file = Bun.file(filePath);
+  if (!(await file.exists())) {
+    throw new Error(`File not found: ${filePath}`);
+  }
+  const content = await file.text();
   return {
     path: filePath,
     content,

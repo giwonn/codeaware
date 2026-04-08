@@ -16,10 +16,17 @@ export function scoreFile(results: AnalyzerResult[]): Level {
   const hc = scoreMap.hiddenContext ?? 0;
   if (hc >= 0.7) return 6;
 
-  // Weighted sum
+  // Weighted sum — skip dimensions with score -1 (not applicable) and redistribute weight
   let weighted = 0;
+  let totalWeight = 0;
   for (const [dim, weight] of Object.entries(WEIGHTS)) {
-    weighted += (scoreMap[dim] ?? 0) * weight;
+    const s = scoreMap[dim] ?? 0;
+    if (s < 0) continue; // skip N/A dimensions
+    weighted += s * weight;
+    totalWeight += weight;
+  }
+  if (totalWeight > 0 && totalWeight < 1) {
+    weighted = weighted / totalWeight; // normalize to 0-1 range
   }
 
   // Map 0.0-1.0 to Level 1-6

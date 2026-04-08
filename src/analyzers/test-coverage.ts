@@ -8,9 +8,9 @@ const OPAQUE_NAMES = new Set([
 
 export class TestCoverageAnalyzer implements Analyzer {
   analyze(content: string, filePath: string, language: string): AnalyzerResult {
-    // Only analyze test files
+    // Only analyze test files — return -1 to signal "not applicable"
     if (!this.isTestFile(filePath)) {
-      return { dimension: "testCoverage", score: 0, evidence: [] };
+      return { dimension: "testCoverage", score: -1, evidence: [] };
     }
 
     const lines = content.split("\n");

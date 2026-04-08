@@ -18,9 +18,9 @@ describe("TestCoverageAnalyzer", () => {
     expect(magicSignals.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("non-test file scores zero", async () => {
+  test("non-test file returns -1 (not applicable)", async () => {
     const content = await Bun.file("tests/fixtures/level-1/clean.ts").text();
     const result = analyzer.analyze(content, "clean.ts", "typescript");
-    expect(result.score).toBe(0);
+    expect(result.score).toBe(-1);
   });
 });

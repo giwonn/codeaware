@@ -2,12 +2,32 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { resolve } from "path";
+import { existsSync } from "fs";
 import { scanFile } from "./tools/scan-file";
 import { scanProjectTool } from "./tools/scan-project";
 import { getImprovementRoadmap } from "./tools/get-improvement-roadmap";
 import { registerPrompts } from "./prompts/architecture-migration";
 import { discoverContext } from "./tools/discover-context";
 import { saveContextAnswer } from "./tools/save-context";
+
+function validatePath(inputPath: string): string {
+  const resolved = resolve(inputPath);
+  if (resolved.includes("\0")) throw new Error("Invalid path: null bytes");
+  if (!existsSync(resolved)) throw new Error(`Path does not exist: ${resolved}`);
+  return resolved;
+}
+
+function validateDir(inputPath: string): string {
+  const resolved = resolve(inputPath);
+  if (resolved.includes("\0")) throw new Error("Invalid path: null bytes");
+  if (!existsSync(resolved)) throw new Error(`Directory does not exist: ${resolved}`);
+  return resolved;
+}
+
+function errorResponse(message: string) {
+  return { content: [{ type: "text" as const, text: JSON.stringify({ error: message }) }], isError: true };
+}
 
 const server = new McpServer({
   name: "codeaware",
@@ -21,8 +41,13 @@ server.registerTool("scan_file", {
     file_path: z.string().describe("Absolute path to the file to analyze"),
   },
 }, async ({ file_path }) => {
-  const result = await scanFile(file_path);
-  return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+  try {
+    const resolved = validatePath(file_path);
+    const result = await scanFile(resolved);
+    return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+  } catch (e) {
+    return errorResponse(e instanceof Error ? e.message : String(e));
+  }
 });
 
 server.registerTool("scan_project", {
@@ -32,8 +57,13 @@ server.registerTool("scan_project", {
     root_dir: z.string().describe("Root directory of the project to scan"),
   },
 }, async ({ root_dir }) => {
-  const result = await scanProjectTool(root_dir);
-  return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+  try {
+    const resolved = validateDir(root_dir);
+    const result = await scanProjectTool(resolved);
+    return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+  } catch (e) {
+    return errorResponse(e instanceof Error ? e.message : String(e));
+  }
 });
 
 server.registerTool("get_improvement_roadmap", {
@@ -43,8 +73,13 @@ server.registerTool("get_improvement_roadmap", {
     root_dir: z.string().describe("Root directory of the project"),
   },
 }, async ({ root_dir }) => {
-  const roadmap = await getImprovementRoadmap(root_dir);
-  return { content: [{ type: "text" as const, text: JSON.stringify(roadmap, null, 2) }] };
+  try {
+    const resolved = validateDir(root_dir);
+    const roadmap = await getImprovementRoadmap(resolved);
+    return { content: [{ type: "text" as const, text: JSON.stringify(roadmap, null, 2) }] };
+  } catch (e) {
+    return errorResponse(e instanceof Error ? e.message : String(e));
+  }
 });
 
 server.registerTool("discover_context", {
@@ -54,11 +89,16 @@ server.registerTool("discover_context", {
     file_path: z.string().describe("Path to the file to analyze"),
   },
 }, async ({ file_path }) => {
-  const questions = await discoverContext(file_path);
-  if (questions.length === 0) {
-    return { content: [{ type: "text" as const, text: "No hidden context detected. This file is safe for AI-driven refactoring." }] };
+  try {
+    const resolved = validatePath(file_path);
+    const questions = await discoverContext(resolved);
+    if (questions.length === 0) {
+      return { content: [{ type: "text" as const, text: "No hidden context detected. This file is safe for AI-driven refactoring." }] };
+    }
+    return { content: [{ type: "text" as const, text: JSON.stringify(questions, null, 2) }] };
+  } catch (e) {
+    return errorResponse(e instanceof Error ? e.message : String(e));
   }
-  return { content: [{ type: "text" as const, text: JSON.stringify(questions, null, 2) }] };
 });
 
 server.registerTool("save_context", {
@@ -74,8 +114,13 @@ server.registerTool("save_context", {
     answer: z.string().describe("The user's answer"),
   },
 }, async ({ project_dir, question_id, file_path, line, signal, question, answer }) => {
-  const result = await saveContextAnswer(project_dir, question_id, file_path, line, signal, question, answer);
-  return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
+  try {
+    const resolvedDir = validateDir(project_dir);
+    const result = await saveContextAnswer(resolvedDir, question_id, file_path, line, signal, question, answer);
+    return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
+  } catch (e) {
+    return errorResponse(e instanceof Error ? e.message : String(e));
+  }
 });
 
 registerPrompts(server);

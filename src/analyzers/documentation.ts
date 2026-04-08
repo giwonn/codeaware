@@ -109,6 +109,7 @@ export class DocumentationAnalyzer implements Analyzer {
     const firstLines = lines.slice(0, 10);
     const hasModuleComment = firstLines.some(l => {
       const t = l.trim();
+      if (t.startsWith("#!")) return false; // shebang is not a module comment
       return t.startsWith("/**") || t.startsWith("//") || t.startsWith("#") || t.startsWith("'''") || t.startsWith('"""');
     });
 

@@ -15,10 +15,13 @@ export interface ProjectAnalysis {
 
 export async function scanProjectTool(rootDir: string): Promise<ProjectAnalysis> {
   const filePaths = await scanFiles(rootDir);
+  const BATCH_SIZE = 20;
   const fileResults: FileAnalysis[] = [];
 
-  for (const fp of filePaths) {
-    fileResults.push(await scanFile(fp));
+  for (let i = 0; i < filePaths.length; i += BATCH_SIZE) {
+    const batch = filePaths.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(batch.map(fp => scanFile(fp)));
+    fileResults.push(...results);
   }
 
   const fileLevels = fileResults.map(f => f.level);

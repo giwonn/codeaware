@@ -60,6 +60,7 @@ export class HiddenContextAnalyzer implements Analyzer {
       if (/^(?:import|require|from)\b/.test(line)) continue;
 
       let match;
+      numberPattern.lastIndex = 0;
       while ((match = numberPattern.exec(line)) !== null) {
         const num = parseFloat(match[1]);
         if (isNaN(num)) continue;

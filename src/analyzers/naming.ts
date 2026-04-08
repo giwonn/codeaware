@@ -82,9 +82,10 @@ export class NamingAnalyzer implements Analyzer {
         }
       }
 
-      // Check for inconsistent casing (detect both camelCase and snake_case usage)
-      this.detectInconsistentCasing(lines, evidence);
     }
+
+    // Check for inconsistent casing (file-level check, runs once)
+    this.detectInconsistentCasing(lines, evidence);
 
     const totalIdentifiers = Math.max(allIdentifiers.length, 1);
     const score = Math.min(1.0, evidence.length / totalIdentifiers);
