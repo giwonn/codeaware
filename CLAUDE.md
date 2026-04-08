@@ -3,11 +3,23 @@
 ## GitHub 계정
 
 이 프로젝트에서 git push, gh 명령은 **giwonn** 계정으로 수행.
-세션 시작 시 `gh auth status`로 확인. giwonn이 active가 아니면:
+배포/push 전에 반드시 다음 절차를 따를 것:
 
 ```bash
+# 1. 현재 active 계정 확인
+gh auth status  # → active account 확인
+
+# 2. giwonn이 아니면 스위칭
 gh auth switch --user giwonn
+
+# 3. 배포/push 작업 수행
+# ...
+
+# 4. 작업 완료 후 원래 계정으로 원복
+gh auth switch --user <원래계정>
 ```
+
+**반드시 원복할 것** — 다른 프로젝트에서 엉뚱한 계정으로 push되는 것을 방지.
 
 ## 릴리즈 워크플로우
 
