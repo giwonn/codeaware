@@ -1,8 +1,9 @@
 import { scanProject as scanFiles } from "../utils/glob-scanner";
 import { scanFile } from "./scan-file";
 import { scoreProject } from "../scoring/project-scorer";
+import { analyzeProjectStructure } from "../analyzers/project-structure/index";
 import { LEVEL_LABELS } from "../analyzers/types";
-import type { Level, FileAnalysis } from "../analyzers/types";
+import type { Level, FileAnalysis, StructuralSignal } from "../analyzers/types";
 
 export interface ProjectAnalysis {
   rootDir: string;
@@ -11,6 +12,7 @@ export interface ProjectAnalysis {
   levelLabel: string;
   levelDistribution: Record<number, number>;
   worstFiles: { filePath: string; level: Level; levelLabel: string }[];
+  structuralSignals: StructuralSignal[];
 }
 
 export async function scanProjectTool(rootDir: string): Promise<ProjectAnalysis> {
@@ -37,6 +39,8 @@ export async function scanProjectTool(rootDir: string): Promise<ProjectAnalysis>
     .slice(0, 10)
     .map(f => ({ filePath: f.filePath, level: f.level, levelLabel: f.levelLabel }));
 
+  const structuralSignals = await analyzeProjectStructure(rootDir, filePaths, fileResults);
+
   return {
     rootDir,
     totalFiles: filePaths.length,
@@ -44,5 +48,6 @@ export async function scanProjectTool(rootDir: string): Promise<ProjectAnalysis>
     levelLabel: LEVEL_LABELS[level],
     levelDistribution,
     worstFiles,
+    structuralSignals,
   };
 }

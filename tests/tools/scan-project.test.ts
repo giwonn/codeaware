@@ -17,4 +17,16 @@ describe("scanProject", () => {
       expect(result.worstFiles[i - 1].level).toBeGreaterThanOrEqual(result.worstFiles[i].level);
     }
   });
+
+  test("returns structuralSignals field", async () => {
+    const result = await scanProjectTool("tests/fixtures");
+    expect(result.structuralSignals).toBeDefined();
+    expect(Array.isArray(result.structuralSignals)).toBe(true);
+  });
+
+  test("structural signals from multi-module fixture", async () => {
+    const result = await scanProjectTool("tests/fixtures/project-structure/domain-duplication");
+    const domainDup = result.structuralSignals.filter(s => s.type === "domain_duplication");
+    expect(domainDup.length).toBeGreaterThan(0);
+  });
 });
