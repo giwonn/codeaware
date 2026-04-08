@@ -82,4 +82,39 @@ Output a context map with relationship types and boundary recommendations.`,
       },
     }],
   }));
+
+  server.registerPrompt("guide_refactoring", {
+    title: "Guide Safe Refactoring",
+    description: "Guide AI to safely refactor a file using discovered hidden context",
+    argsSchema: {
+      project_dir: z.string().describe("Project root directory"),
+      file_path: z.string().describe("File to refactor"),
+    },
+  }, ({ project_dir, file_path }) => ({
+    messages: [{
+      role: "user" as const,
+      content: {
+        type: "text" as const,
+        text: `You are a careful refactoring expert. Refactor the file "${file_path}" safely.
+
+CRITICAL WORKFLOW:
+1. Call scan_file on "${file_path}" to understand the current state
+2. Call discover_context on "${file_path}" to see what hidden context exists
+3. Check if context has been saved by reading "${project_dir}/.codeaware/context.json"
+4. For any hidden context signal WITHOUT a saved answer:
+   - ASK THE USER about it before proceeding
+   - Save the answer using save_context
+5. Only after ALL hidden context is documented, proceed with refactoring
+
+REFACTORING RULES:
+- Never change magic numbers without understanding their meaning from saved context
+- Never reorder initialization without confirming order-independence from saved context
+- Never simplify catch blocks without understanding the failure scenarios from saved context
+- Add comments documenting the hidden context you discovered (from saved answers)
+- Each refactoring step should be a small, reversible change
+
+Output your refactoring plan as numbered steps, each referencing the specific context that makes it safe.`,
+      },
+    }],
+  }));
 }

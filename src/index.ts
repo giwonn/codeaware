@@ -6,6 +6,8 @@ import { scanFile } from "./tools/scan-file";
 import { scanProjectTool } from "./tools/scan-project";
 import { getImprovementRoadmap } from "./tools/get-improvement-roadmap";
 import { registerPrompts } from "./prompts/architecture-migration";
+import { discoverContext } from "./tools/discover-context";
+import { saveContextAnswer } from "./tools/save-context";
 
 const server = new McpServer({
   name: "codeaware",
@@ -43,6 +45,37 @@ server.registerTool("get_improvement_roadmap", {
 }, async ({ root_dir }) => {
   const roadmap = await getImprovementRoadmap(root_dir);
   return { content: [{ type: "text" as const, text: JSON.stringify(roadmap, null, 2) }] };
+});
+
+server.registerTool("discover_context", {
+  title: "Discover Hidden Context",
+  description: "Analyze a file and generate questions to uncover hidden context. Use before refactoring to identify what the AI doesn't know about the code.",
+  inputSchema: {
+    file_path: z.string().describe("Path to the file to analyze"),
+  },
+}, async ({ file_path }) => {
+  const questions = await discoverContext(file_path);
+  if (questions.length === 0) {
+    return { content: [{ type: "text" as const, text: "No hidden context detected. This file is safe for AI-driven refactoring." }] };
+  }
+  return { content: [{ type: "text" as const, text: JSON.stringify(questions, null, 2) }] };
+});
+
+server.registerTool("save_context", {
+  title: "Save Context Answer",
+  description: "Save a user's answer about hidden context. Call this after the user answers a question from discover_context.",
+  inputSchema: {
+    project_dir: z.string().describe("Project root directory"),
+    question_id: z.string().describe("ID from the discover_context question"),
+    file_path: z.string().describe("File path the question is about"),
+    line: z.number().describe("Line number"),
+    signal: z.string().describe("Signal type"),
+    question: z.string().describe("The original question"),
+    answer: z.string().describe("The user's answer"),
+  },
+}, async ({ project_dir, question_id, file_path, line, signal, question, answer }) => {
+  const result = await saveContextAnswer(project_dir, question_id, file_path, line, signal, question, answer);
+  return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
 });
 
 registerPrompts(server);
