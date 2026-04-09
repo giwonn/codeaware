@@ -47,6 +47,42 @@ evidence가 없으면 AI 판단을 생략하고 기존 형식대로 출력합니
 - 종합 소견은 행동 가능해야 함 ("주의 필요" 같은 모호한 표현 대신 구체적 권고)
 - 파일을 Read할 수 없으면 (삭제됨, 권한 없음, 바이너리 등) 해당 파일의 AI 판단을 생략하고 이유를 표시
 
+## 출력 언어
+
+사용자의 대화 언어에 맞춰 출력하세요. 한국어로 대화 중이면 시그널 이름, 심각도, 판정 등 모든 항목을 한국어로 표시합니다.
+
+### 시그널 이름 한글 매핑
+
+- `magic_number` → 매직 넘버
+- `hardcoded_date` → 하드코딩된 날짜
+- `order_dependent_init` → 순서 의존 초기화
+- `unexplained_catch` → 설명 없는 catch
+- `unexplained_value_comparison` → 설명 없는 값 비교
+- `env_specific_branch` → 환경별 분기
+- `commented_out_code` → 주석 처리된 코드
+- `todo_without_ticket` → 티켓 없는 TODO
+- `generic_name` → 범용적 이름
+- `single_letter_name` → 한 글자 이름
+- `inconsistent_casing` → 네이밍 규칙 혼재
+- `undocumented_export` → 문서 없는 export
+- `uncommented_complex_condition` → 설명 없는 복잡 조건
+- `unexplained_regex` → 설명 없는 정규식
+- `mixed_export_styles` → export 스타일 혼재
+- `inconsistent_error_handling` → 에러 처리 불일치
+- `high_function_length_variance` → 함수 길이 편차 큼
+- `high_import_count` → import 과다
+- `global_state_access` → 전역 상태 접근
+- `deep_relative_import` → 깊은 상대경로 import
+- `unclear_test_name` → 불명확한 테스트 이름
+- `magic_value_in_test` → 테스트 내 매직 값
+- `no_edge_case_tests` → 엣지 케이스 테스트 부재
+
+### 심각도 한글 매핑
+
+- `high` → 높음
+- `medium` → 보통
+- `low` → 낮음
+
 ## 출력 형식
 
 결과를 받으면 다음 형식으로 사용자에게 보고하세요:
@@ -56,23 +92,28 @@ evidence가 없으면 AI 판단을 생략하고 기존 형식대로 출력합니
 ```
 ## [파일명] — Level X: [Label]
 
-| Dimension | Score | Signals |
-|-----------|-------|---------|
+| 차원 | 점수 | 시그널 |
+|------|------|--------|
 | ... | ... | ... |
 
 ### AI 분석
 
 #### Evidence 판정
-| # | Line | Signal | Regex 심각도 | AI 판정 | 이유 |
-|---|------|--------|-----------|---------|------|
-| 1 | 42 | magic_number | high | false_positive | 상수 RETRY_COUNT에 할당된 값 |
-| 2 | 87 | unexplained_catch | high | confirmed | 에러 타입별 분기 이유 불명 |
-| 3 | 120 | magic_number | high | severity_adjusted ↓medium | 테스트 fixture |
+| # | Line | 시그널 | Regex 심각도 | AI 판정 | 이유 |
+|---|------|--------|-------------|---------|------|
+| 1 | 42 | 매직 넘버 | 높음 | 오탐 | 상수 RETRY_COUNT에 할당된 값 |
+| 2 | 87 | 설명 없는 catch | 높음 | 확인됨 | 에러 타입별 분기 이유 불명 |
+| 3 | 120 | 매직 넘버 | 높음 | 심각도 조정 ↓보통 | 테스트 fixture |
 
 #### 종합 소견
 이 파일의 calculatePrice() 함수에는 할인율 계산이 매직 넘버로 인코딩되어 있습니다.
 리팩토링 시 비즈니스팀에 할인 정책을 확인하세요.
 ```
+
+AI 판정 한글 매핑:
+- `confirmed` → 확인됨
+- `false_positive` → 오탐
+- `severity_adjusted` → 심각도 조정
 
 evidence가 없는 파일은 AI 분석 섹션을 생략합니다.
 
@@ -83,10 +124,11 @@ evidence가 없는 파일은 AI 분석 섹션을 생략합니다.
 
 - 총 파일 수: N
 - 레벨 분포: Level 1: n개, Level 2: n개, ...
+
 ### Worst Files (Top 10) — AI 분석 포함
 | # | File | Level | 핵심 문제 | AI 소견 요약 |
 |---|------|-------|----------|-------------|
-| 1 | src/pricing.ts | 6 | magic_number ×5 | 할인 정책이 숫자로 하드코딩 |
+| 1 | src/pricing.ts | 6 | 매직 넘버 ×5 | 할인 정책이 숫자로 하드코딩 |
 | 2 | ... | ... | ... | ... |
 
 > 나머지 N개 파일의 AI 분석을 보려면 "더 보여줘"라고 말씀하세요.
